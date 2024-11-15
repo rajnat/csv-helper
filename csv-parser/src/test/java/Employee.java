@@ -4,6 +4,8 @@ import org.rajnat.csv.parser.CsvField;
 import java.util.Objects;
 
 public class Employee {
+
+
     @CsvField(name = "Employee ID", order = 1)
     private int id;
 
@@ -15,6 +17,17 @@ public class Employee {
 
     @CsvField(name = "Salary", order = 4)
     private double salary;
+
+    @CsvField(name = "Contract Type", order = 5)
+    private ContractType contractType;
+
+    public ContractType getContractType() {
+        return contractType;
+    }
+
+    public void setContractType(ContractType contractType) {
+        this.contractType = contractType;
+    }
 
     // Getters and setters
     public int getId() {
@@ -53,12 +66,12 @@ public class Employee {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Employee employee = (Employee) o;
-        return id == employee.id && age == employee.age && Double.compare(salary, employee.salary) == 0 && Objects.equals(name, employee.name);
+        return id == employee.id && age == employee.age && Double.compare(salary, employee.salary) == 0 && Objects.equals(name, employee.name) && contractType == employee.contractType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, age, salary);
+        return Objects.hash(id, name, age, salary, contractType);
     }
 }
 

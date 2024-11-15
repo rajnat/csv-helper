@@ -18,12 +18,14 @@ public class CsvParseTest {
         emp1.setName("John Doe");
         emp1.setAge(30);
         emp1.setSalary(50000.0);
+        emp1.setContractType(ContractType.FULLTIME);
 
         Employee emp2 = new Employee();
         emp2.setId(2);
         emp2.setName("Jane Smith");
         emp2.setAge(28);
         emp2.setSalary(55000.0);
+        emp2.setContractType(ContractType.PART_TIME);
 
         List<Employee> employees = Arrays.asList(emp1, emp2);
         CsvExporter.exportToCsv(employees, "employees.csv");

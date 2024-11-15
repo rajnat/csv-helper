@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 public @interface CsvField {
     String name() default "";  // The column name in the CSV
     int order() default Integer.MAX_VALUE;  // Column order for serialization
+    Class<? extends Enum<?>> enumClass() default NoEnum.class;  // Enum class for translation
+    String[] enumValues() default {};  // Corresponding string values for enum constants
 }
