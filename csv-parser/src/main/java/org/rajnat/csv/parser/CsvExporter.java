@@ -1,4 +1,5 @@
 package org.rajnat.csv.parser;
+import org.rajnat.csv.api.Exporter;
 import org.rajnat.csv.exception.CsvParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,30 +11,80 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
-public class CsvExporter {
+public class CsvExporter implements Exporter {
     private static final Logger log = LoggerFactory.getLogger(CsvExporter.class);
 
     /**
      * Exports a list of objects to a CSV file asynchronously.
      *
-     * @param <T> the type of objects in the list
-     * @param data the list of objects to export
+     * @param <T>      the type of objects in the list
+     * @param data     the list of objects to export
      * @param fileName the name of the output CSV file
      * @return a CompletableFuture representing the asynchronous operation
      */
-    public static <T> CompletableFuture<?> exportToCsv(List<T> data, String fileName) {
+    public <T> CompletableFuture<?> exportToCsv(List<T> data, String fileName) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                writeDataToCsv(data, fileName);
+                CsvExporter.writeDataToCsv(data, fileName);
                 return "Export successful"; // return success message or status
             } catch (IOException | CsvParseException e) {
-                log.error("Failed to export data to CSV", e);
+                CsvExporter.log.error("Failed to export data to CSV", e);
                 throw new RuntimeException(e); // Rethrow as unchecked exception
             }
         });
+    }
+
+    /**
+     * Exports a stream of objects to a CSV file asynchronously.
+     *
+     * @param <T>        the type of objects in the stream
+     * @param dataStream the stream of objects to export
+     * @param fileName   the name of the output CSV file
+     * @return a CompletableFuture representing the asynchronous operation
+     */
+    public <T> CompletableFuture<?> exportToCsv(Stream<T> dataStream, String fileName) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                CsvExporter.writeDataToCsv(dataStream, fileName);
+                return "Export successful"; // return success message or status
+            } catch (IOException | CsvParseException e) {
+                CsvExporter.log.error("Failed to export data to CSV", e);
+                throw new RuntimeException(e); // Rethrow as unchecked exception
+            }
+        });
+    }
+
+    /**
+     * Writes the stream of objects to a CSV file in a streaming fashion.
+     *
+     * @param <T> the type of objects in the stream
+     * @param dataStream the stream of objects to export
+     * @param fileName the name of the output CSV file
+     * @throws IOException if an I/O error occurs while writing to the file
+     */
+    private static <T> void writeDataToCsv(Stream<T> dataStream, String fileName) throws IOException, CsvParseException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            // Obtain a sample object for header generation
+            T firstObject = dataStream.findFirst().orElseThrow(() -> new RuntimeException("The stream is empty"));
+
+            // Write header
+            writer.write(getCsvHeader(firstObject));
+            writer.newLine();
+
+            // Reset the stream after finding the first element
+            Stream<T> remainingData = dataStream.skip(1);
+
+            // Write data rows
+            for (T object : remainingData.collect(Collectors.toList())) {
+                writer.write(getCsvRow(object));
+                writer.newLine();
+            }
+        }
     }
 
     /**

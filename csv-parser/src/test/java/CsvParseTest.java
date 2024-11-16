@@ -28,14 +28,16 @@ public class CsvParseTest {
         emp2.setContractType(ContractType.PART_TIME);
 
         List<Employee> employees = Arrays.asList(emp1, emp2);
+        CsvExporter exporter = new CsvExporter();
         // Export to CSV asynchronously
-        CompletableFuture<?> exportFuture = CsvExporter.exportToCsv(employees, "employees.csv");
+        CompletableFuture<?> exportFuture = exporter.exportToCsv(employees, "employees.csv");
 
         // Wait for the export to complete
         exportFuture.get();
 
         // Import from CSV
-        CompletableFuture<List<Employee>> importedEmployeesFuture = CsvImporter.importFromCsvAsync("employees.csv", Employee.class);
+        CsvImporter importer = new CsvImporter();
+        CompletableFuture<List<Employee>> importedEmployeesFuture = importer.importFromCsvAsync("employees.csv", Employee.class);
         List<Employee> importedEmployees = importedEmployeesFuture.get();
         assertEquals(employees, importedEmployees);
     }
