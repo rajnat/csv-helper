@@ -3,11 +3,13 @@ import org.rajnat.csv.exception.CsvParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 
@@ -15,7 +17,27 @@ public class CsvExporter {
     private static final Logger log = LoggerFactory.getLogger(CsvExporter.class);
 
     /**
-     * Exports a list of objects to a CSV file.
+     * Exports a list of objects to a CSV file asynchronously.
+     *
+     * @param <T> the type of objects in the list
+     * @param data the list of objects to export
+     * @param fileName the name of the output CSV file
+     * @return a CompletableFuture representing the asynchronous operation
+     */
+    public static <T> CompletableFuture<?> exportToCsv(List<T> data, String fileName) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                writeDataToCsv(data, fileName);
+                return "Export successful"; // return success message or status
+            } catch (IOException | CsvParseException e) {
+                log.error("Failed to export data to CSV", e);
+                throw new RuntimeException(e); // Rethrow as unchecked exception
+            }
+        });
+    }
+
+    /**
+     * Writes the list of objects to a CSV file.
      *
      * @param <T> the type of objects in the list
      * @param data the list of objects to export
@@ -23,21 +45,16 @@ public class CsvExporter {
      * @throws IOException if an I/O error occurs while writing to the file
      * @throws CsvParseException if there is a problem parsing the CSV data
      */
-    public static <T> void exportToCsv(List<T> data, String fileName) throws IOException, CsvParseException {
-        if (data == null || data.isEmpty()) {
-            return;
-        }
+    private static <T> void writeDataToCsv(List<T> data, String fileName) throws IOException, CsvParseException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            // Write header
+            writer.write(getCsvHeader(data.get(0)));
+            writer.newLine();
 
-        try (FileWriter writer = new FileWriter(fileName)) {
-            // Get the header row from the first object in the list
-            T firstObject = data.get(0);
-            String header = getCsvHeader(firstObject);
-            writer.append(header).append("\n");
-
-            // Write the data rows
-            for (T item : data) {
-                String row = getCsvRow(item);
-                writer.append(row).append("\n");
+            // Write data rows
+            for (T object : data) {
+                writer.write(getCsvRow(object));
+                writer.newLine();
             }
         }
     }

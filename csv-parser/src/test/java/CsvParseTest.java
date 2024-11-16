@@ -6,13 +6,15 @@ import org.rajnat.csv.parser.CsvImporter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CsvParseTest {
 
     @Test
-    public void testSerialize() throws IOException, CsvParseException {
+    public void testSerialize() throws IOException, CsvParseException, ExecutionException, InterruptedException {
         Employee emp1 = new Employee();
         emp1.setId(1);
         emp1.setName("John Doe");
@@ -28,9 +30,15 @@ public class CsvParseTest {
         emp2.setContractType(ContractType.PART_TIME);
 
         List<Employee> employees = Arrays.asList(emp1, emp2);
-        CsvExporter.exportToCsv(employees, "employees.csv");
+        // Export to CSV asynchronously
+        CompletableFuture<?> exportFuture = CsvExporter.exportToCsv(employees, "employees.csv");
+
+        // Wait for the export to complete
+        exportFuture.get();
+
         // Import from CSV
-        List<Employee> importedEmployees = CsvImporter.importFromCsv("employees.csv", Employee.class);
+        CompletableFuture<List<Employee>> importedEmployeesFuture = CsvImporter.importFromCsvAsync("employees.csv", Employee.class);
+        List<Employee> importedEmployees = importedEmployeesFuture.get();
         assertEquals(employees, importedEmployees);
     }
 }

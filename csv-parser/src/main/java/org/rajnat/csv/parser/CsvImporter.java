@@ -7,10 +7,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static java.lang.String.format;
@@ -19,31 +21,35 @@ public class CsvImporter {
     private static final Logger log = LoggerFactory.getLogger(CsvImporter.class);
 
     /**
-     * Imports a list of objects from a CSV file.
+     * Imports a list of objects from a CSV file asynchronously.
      *
      * @param <T> the type of objects to import
      * @param fileName the name of the input CSV file
      * @param clazz the class type of the objects
-     * @return a list of imported objects
-     * @throws IOException if an I/O error occurs while reading from the file
-    */
-    public static <T> List<T> importFromCsv(String fileName, Class<T> clazz) throws IOException {
-        List<T> resultList = new ArrayList<>();
+     * @return a CompletableFuture containing a list of imported objects
+     */
+    public static <T> CompletableFuture<List<T>> importFromCsvAsync(String fileName, Class<T> clazz) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<T> resultList = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            String headerLine = reader.readLine();  // Read the header line
-            String[] headers = headerLine.split(",");
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+                String headerLine = reader.readLine();  // Read the header line
+                String[] headers = headerLine.split(",");
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] values = line.split(",");
-                T obj = mapCsvToObject(values, headers, clazz);
-                resultList.add(obj);
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] values = line.split(",");
+                    T obj = mapCsvToObject(values, headers, clazz);
+                    resultList.add(obj);
+                }
+            } catch (IOException e) {
+                log.error("Error reading CSV file: " + fileName, e);
             }
-        }
 
-        return resultList;
+            return resultList;
+        });
     }
+
     /**
      * Maps CSV values to a new object instance.
      *
@@ -115,14 +121,12 @@ public class CsvImporter {
                 // First, try to use the custom 'fromString' method if it exists.
                 var fromStringMethod = enumClass.getMethod("fromString", String.class);
                 return fromStringMethod.invoke(null, value);  // Call static fromString method
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 // Fall back to default parsing using Enum.valueOf()
                 return Enum.valueOf(enumClass.asSubclass(Enum.class), value.toUpperCase());
             }
         } catch (IllegalArgumentException e) {
             log.error(format("Invalid enum value: %s for enum: %s", value,enumType.getSimpleName()), e);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;  // Return null if the value cannot be mapped to an enum
     }
