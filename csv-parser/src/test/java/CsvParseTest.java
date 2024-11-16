@@ -1,9 +1,7 @@
 import org.junit.jupiter.api.Test;
-import org.rajnat.csv.exception.CsvParseException;
 import org.rajnat.csv.parser.CsvExporter;
 import org.rajnat.csv.parser.CsvImporter;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CsvParseTest {
 
     @Test
-    public void testSerialize() throws IOException, CsvParseException, ExecutionException, InterruptedException {
+    public void testSerialize() throws ExecutionException, InterruptedException {
         Employee emp1 = new Employee();
         emp1.setId(1);
         emp1.setName("John Doe");
