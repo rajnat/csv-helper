@@ -33,9 +33,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/yourusername/csv-helper.git</connection>
-        <developerConnection>scm:git:https://github.com/yourusername/csv-helper.git</developerConnection>
-        <url>https://github.com/yourusername/csv-helper</url>
+        <connection>scm:git:https://github.com/rajnat/csv-helper.git</connection>
+        <developerConnection>scm:git:https://github.com/rajnat/csv-helper.git</developerConnection>
+        <url>https://github.com/rajnat/csv-helper</url>
     </scm>
 
     <build>
