@@ -11,12 +11,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 
 public class CsvImporter {
     private static final Logger log = LoggerFactory.getLogger(CsvImporter.class);
 
+    /**
+     * Imports a list of objects from a CSV file.
+     *
+     * @param <T> the type of objects to import
+     * @param fileName the name of the input CSV file
+     * @param clazz the class type of the objects
+     * @return a list of imported objects
+     * @throws IOException if an I/O error occurs while reading from the file
+    */
     public static <T> List<T> importFromCsv(String fileName, Class<T> clazz) throws IOException {
         List<T> resultList = new ArrayList<>();
 
@@ -34,7 +44,15 @@ public class CsvImporter {
 
         return resultList;
     }
-
+    /**
+     * Maps CSV values to a new object instance.
+     *
+     * @param <T> the type of the object
+     * @param values an array of string values from a CSV row
+     * @param headers an array of header names corresponding to the values
+     * @param clazz the class type of the object
+     * @return an instance of the object with fields set from the CSV values
+     */
     private static <T> T mapCsvToObject(String[] values, String[] headers, Class<T> clazz) {
         try {
             T obj = clazz.getDeclaredConstructor().newInstance();

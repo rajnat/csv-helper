@@ -13,6 +13,16 @@ import static java.lang.String.format;
 
 public class CsvExporter {
     private static final Logger log = LoggerFactory.getLogger(CsvExporter.class);
+
+    /**
+     * Exports a list of objects to a CSV file.
+     *
+     * @param <T> the type of objects in the list
+     * @param data the list of objects to export
+     * @param fileName the name of the output CSV file
+     * @throws IOException if an I/O error occurs while writing to the file
+     * @throws CsvParseException if there is a problem parsing the CSV data
+     */
     public static <T> void exportToCsv(List<T> data, String fileName) throws IOException, CsvParseException {
         if (data == null || data.isEmpty()) {
             return;
@@ -32,6 +42,13 @@ public class CsvExporter {
         }
     }
 
+    /**
+     * Generates the CSV header based on the fields of an object.
+     *
+     * @param <T> the type of the object
+     * @param object the object to extract field names from
+     * @return a comma-separated string representing the CSV header
+     */
     private static <T> String getCsvHeader(T object) {
         StringBuilder header = new StringBuilder();
         Field[] fields = object.getClass().getDeclaredFields();
@@ -51,6 +68,14 @@ public class CsvExporter {
         return header.toString().replaceAll(",$", ""); // Remove the trailing comma
     }
 
+    /**
+     * Generates a CSV row for an object.
+     *
+     * @param <T> the type of the object
+     * @param object the object to extract field values from
+     * @return a comma-separated string representing the CSV row
+     * @throws CsvParseException if there is a problem parsing the CSV data
+     */
     private static <T> String getCsvRow(T object) throws CsvParseException {
         StringBuilder row = new StringBuilder();
         Field[] fields = object.getClass().getDeclaredFields();
