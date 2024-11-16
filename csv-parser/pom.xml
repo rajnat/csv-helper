@@ -9,7 +9,7 @@
     <version>0.0.1</version>
     <packaging>jar</packaging>
     <url>https://github.com/rajnat/csv-helper</url>
-    <description>A simple utility to help serialize/deserialize CSV files with a simple annotation based API.</description>
+    <description>A simple utility to help serialize/deserialize CSV files with a simple </description>
     <!-- Parent POM (if applicable) -->
     <developers>
         <developer>
